@@ -59,10 +59,15 @@ module Shipstation
     attr_writer :password
 
     def request method, resource, params = {}
-      ss_username = params[:username] || Shipstation.username
-      ss_password = params[:password] || Shipstation.password
+      if params.is_a?(::Hash)
+        ss_username = params[:username] || Shipstation.username
+        ss_password = params[:password] || Shipstation.password
 
-      params.except!(:username, :password)
+        params.except!(:username, :password)
+      else
+        ss_username = Shipstation.username
+        ss_password = Shipstation.password
+      end
 
       defined? method or raise(
         ArgumentError, "Request method has not been specified"
@@ -71,7 +76,7 @@ module Shipstation
         ArgumentError, "Request resource has not been specified"
       )
       if method == :get
-        headers = {:accept => :json, content_type: :json}.merge({params: params})
+        headers = {:accept => :json, content_type: :json}.merge({params: params}) if params.is_a?(::Hash)
         payload = nil
       else
         headers = {:accept => :json, content_type: :json}
